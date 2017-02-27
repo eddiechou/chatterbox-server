@@ -1,3 +1,4 @@
+var fs = require('fs');
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -19,6 +20,35 @@ var defaultCorsHeaders = {
 };
 
 var requestHandler = function(request, response) {
+
+  console.log('Serving request type ' + request.method + ' for url ' + request.url);
+  var statusCode = 200;
+  var headers = defaultCorsHeaders;
+  headers['Content-Type'] = 'application/json';
+
+  // Return 404 for all unhandled endpoints
+  if (request.url !== '/classes/messages') {
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+    response.end();
+  }
+
+  if (request.method === 'POST') {
+    if (request.url === '/classes/messages') {
+      statusCode = 201;
+      // Insert message into message file
+    }
+  } else if (request.method === 'GET') {
+
+  }
+  response.writeHead(statusCode, headers);
+
+
+  response.end(JSON.stringify({results: []}));
+};
+
+/*
+var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
   // They include information about both the incoming request, such as
@@ -37,7 +67,6 @@ var requestHandler = function(request, response) {
 
   // The outgoing status.
   var statusCode = 200;
-
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
@@ -45,7 +74,12 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'text/plain';
+  headers['Content-Type'] = 'application/json';
+  if (request.url !== '/classes/messages') {
+    statusCode = 404;
+    response.writeHead(statusCode, headers);
+    response.end();
+  }
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
@@ -58,8 +92,9 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end('Hello, World!');
+  response.end(JSON.stringify({results: []}));
 };
+*/
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
