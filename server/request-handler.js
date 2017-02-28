@@ -36,7 +36,7 @@ var requestHandler = function(request, response) {
   }
 
   if (request.method === 'OPTIONS') {
-    console.log('OPTIONS');
+    // console.log('OPTIONS');
     response.writeHead(statusCode, headers);
     response.end(); 
   } else if (request.method === 'POST') { // Handle POST requests
@@ -54,7 +54,7 @@ var requestHandler = function(request, response) {
         } else {
           var obj = fs.readFileSync('messages.txt');
           obj = JSON.parse(obj);
-          console.log(obj);
+          // console.log(obj);
           obj.results.unshift(JSON.parse(data.toString()));
 
           fs.writeFileSync('messages.txt', JSON.stringify(obj));
@@ -66,8 +66,8 @@ var requestHandler = function(request, response) {
     response.end();  
     //
   } else if (request.method === 'GET') {  // Handle GET requests
-    console.log('request.url: ', request.url);
-    if (request.url === '/classes/messages?order=-createdAt') {
+    // console.log('request.url: ', request.url);
+    if (request.url === '/classes/messages?order=-createdAt' || request.url === '/classes/messages') {
       if (!fs.existsSync('messages.txt')) {
         response.writeHead(statusCode, headers);  
         response.end(JSON.stringify({results: []}));
@@ -75,7 +75,7 @@ var requestHandler = function(request, response) {
         var obj = fs.readFileSync('messages.txt');
         response.writeHead(statusCode, headers);
         // response.end(JSON.stringify({results: [JSON.parse(result.toString())]})); 
-        console.log(JSON.parse(obj.toString()));
+        // console.log(JSON.parse(obj.toString()));
         obj = JSON.parse(obj.toString());
         response.end(JSON.stringify(obj));
       } 

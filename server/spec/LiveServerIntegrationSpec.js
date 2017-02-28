@@ -72,6 +72,83 @@ describe('server', function() {
       done();
     });
   });
+  it('should respond with a messages array', function(done) {
+    var requestParams = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        text: 'Do my bidding!'}
+    };
+
+    request(requestParams, function(error, response, body) {
+      // Now if we request the log, that message we posted should be there:
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        // console.log(messages);
+        expect(Array.isArray(messages)).to.be.true;
+        // expect(messages[0].username).to.equal('Jono');
+        // expect(messages[0].text).to.equal('Do my bidding!');
+        done();
+      });
+    });
+  });
+  it('should display most recent messages', function(done) {
+    var requestParams1 = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Jono',
+        text: 'Do my bidding!'}
+    };
+
+    var requestParams2 = {method: 'POST',
+      uri: 'http://127.0.0.1:3000/classes/messages',
+      json: {
+        username: 'Brandon',
+        text: 'Most recent message!'}
+    };
+    request(requestParams1, function() {
+
+    });
+    request(requestParams2, function(error, response, body) {
+      request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+        var messages = JSON.parse(body).results;
+        expect(messages[0].username).to.equal('Brandon');
+        expect(messages[0].text).to.equal('Most recent message!');
+        expect(messages[1].username).to.equal('Jono');
+        expect(messages[1].text).to.equal('Do my bidding!');
+        done();
+      });
+    });
+    // request(requestParams, function(error, response, body) {
+    //   // Now if we request the log, that message we posted should be there:
+    //   request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+    //     var messages = JSON.parse(body).results;
+    //     // console.log(messages);
+    //     expect(Array.isArray(messages)).to.be.true;
+    //     // expect(messages[0].username).to.equal('Jono');
+    //     // expect(messages[0].text).to.equal('Do my bidding!');
+    //     done();
+    //   });
+    // });
+  });
+
+
+  it('Should return 200 status code when request method is OPTION', function(done) {
+    var requestParams1 = {method: 'OPTIONS',
+      uri: 'http://127.0.0.1:3000/classes/messages'
+    };    
+    request(requestParams1, function(error, response, body) {
+      expect(response.statusCode).to.equal(200);
+      done();
+    });
+  });
+
+  // it('Should return an empty array if nothing has been posted', function(done) {
+  //   request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
+  //     var messages = JSON.parse(body).results;
+  //     expect(messages.length).to.equal(0);
+  //   });
+  // });
 
 
 });
