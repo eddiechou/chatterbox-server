@@ -31,7 +31,7 @@ var app = {
       // This is the url you should use to communicate with the parse API server.
       url: 'http://127.0.0.1:3000/classes/messages',
       type: 'GET',
-      // data: 'order=-createdAt',
+      data: 'order=-createdAt',
       // data: JSON.stringify(message),
       // contentType: 'application/json',
       //dataType: 'jsonp',

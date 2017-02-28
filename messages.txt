@@ -1,1 +1,1 @@
-{"username":"Jono","message":"Do my bidding!"}
+{"results":[{"text":"CHEATERRRRR","username":"Brandon","roomname":"lobby"},{"text":"hello","username":"Brandon","roomname":"lobby"},{"text":"test","username":"Brandon","roomname":"lobby"},{"text":"asdf","username":"Brandon","roomname":"lobby"}]}

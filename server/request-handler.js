@@ -28,53 +28,59 @@ var requestHandler = function(request, response) {
   headers['Content-Type'] = 'application/json';
 
   // Return 404 for all unhandled endpoints
-  if (request.url !== '/classes/messages') {
+  // console.log(request.url.slice(0, 17));
+  if (request.url.slice(0, 17) !== '/classes/messages') {
     statusCode = 404;
     response.writeHead(statusCode, headers);
     response.end();
   }
 
-  // Handle POST requests
-  if (request.method === 'POST') {
+  if (request.method === 'OPTIONS') {
+    console.log('OPTIONS');
+    response.writeHead(statusCode, headers);
+    response.end(); 
+  } else if (request.method === 'POST') { // Handle POST requests
     // Insert message into message file
     if (request.url === '/classes/messages') {
       statusCode = 201;
       // append object to file
       request.on('data', function(data) {
-        // console.log(JSON.stringify(chunk.toString()));
-        // fs.writeFile('messages.txt', JSON.stringify(data.toString()), (err) => {
-        //   if (err) {
-        //     throw err;
-        //   }
-        //   console.log('The "data to append" was appended to file!');
-        // });
-        // console.log('data: ', JSON.stringify(data));
-        fs.writeFileSync('messages.txt', data);
+
+        if (!fs.existsSync('messages.txt')) {
+
+          var obj = {results: []};
+          obj.results.unshift(JSON.parse(data.toString()));
+          fs.writeFileSync('messages.txt', JSON.stringify(obj));          
+        } else {
+          var obj = fs.readFileSync('messages.txt');
+          obj = JSON.parse(obj);
+          console.log(obj);
+          obj.results.unshift(JSON.parse(data.toString()));
+
+          fs.writeFileSync('messages.txt', JSON.stringify(obj));
+        }
+
       });
     }
     response.writeHead(statusCode, headers);
     response.end();  
     //
   } else if (request.method === 'GET') {  // Handle GET requests
-    // fs.readFile('messages.txt', (err, data) => {
-    //   if (err) { 
-    //     throw err;
-    //   }
-    //   // console.log(JSON.parse(data)); 
-    //   results.push(JSON.stringify(data.toString())); // data is a JSON object
-    //   console.log('results: ', results);
-    //   console.log('Successfully read the messages file');
-    //   console.log('****data from messages file: ', results);
-    //   response.writeHead(statusCode, headers);
-    //   response.end(JSON.stringify({results: results}));
-    // });
-    var result = fs.readFileSync('messages.txt');
-    // console.log('result: ', typeof JSON.parse(result.toString()));
-    // console.log('result: ', JSON.parse(result.toString('utf-8')));
-    response.writeHead(statusCode, headers);
-    response.end(JSON.stringify({results: [JSON.parse(result.toString())]}));
+    console.log('request.url: ', request.url);
+    if (request.url === '/classes/messages?order=-createdAt') {
+      if (!fs.existsSync('messages.txt')) {
+        response.writeHead(statusCode, headers);  
+        response.end(JSON.stringify({results: []}));
+      } else {
+        var obj = fs.readFileSync('messages.txt');
+        response.writeHead(statusCode, headers);
+        // response.end(JSON.stringify({results: [JSON.parse(result.toString())]})); 
+        console.log(JSON.parse(obj.toString()));
+        obj = JSON.parse(obj.toString());
+        response.end(JSON.stringify(obj));
+      } 
+    }
   }
-  // response.end(JSON.stringify({results: results}));  
 };
 
 /*
