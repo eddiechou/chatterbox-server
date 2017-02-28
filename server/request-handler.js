@@ -20,6 +20,7 @@ var defaultCorsHeaders = {
 };
 
 var requestHandler = function(request, response) {
+  var results;
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
   var statusCode = 200;
@@ -33,18 +34,38 @@ var requestHandler = function(request, response) {
     response.end();
   }
 
+  // Handle POST requests
   if (request.method === 'POST') {
+    // Insert message into message file
     if (request.url === '/classes/messages') {
       statusCode = 201;
-      // Insert message into message file
+      // append object to file
+      request.on('data', function(data) {
+        // console.log(JSON.stringify(chunk.toString()));
+        fs.appendFile('messages.txt', JSON.stringify(data.toString()), (err) => {
+          if (err) {
+            throw err;
+          }
+          console.log('The "data to append" was appended to file!');
+        });
+      });
     }
-  } else if (request.method === 'GET') {
 
+    //
+  } else if (request.method === 'GET') {  // Handle GET requests
+    fs.readFile('messages.txt', (err, data) => {
+      if (err) { 
+        throw err;
+      }
+      // console.log(JSON.parse(data)); 
+      results = data; // data is a JSON object
+      console.log('Successfully read the messages file');
+      console.log('****data from messages file: ', data);
+    });
   }
+
   response.writeHead(statusCode, headers);
-
-
-  response.end(JSON.stringify({results: []}));
+  response.end(JSON.stringify({results: [results]}));
 };
 
 /*
