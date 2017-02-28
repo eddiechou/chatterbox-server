@@ -116,4 +116,33 @@ describe('Node Server Request Listener Function', function() {
       });
   });
 
+  it('Should return 200 status code when request method is OPTIONS', function() {
+    var req = new stubs.request('/classes/messages', 'OPTIONS');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Wait for response to return and then check status code
+    waitForThen(
+      function() { return res._ended; },
+      function() {
+        expect(res._responseCode).to.equal(200);
+      });
+  });
+
+  it('should respond with a messages array', function() {
+    var req = new stubs.request('/classes/messages', 'GET');
+    var res = new stubs.response();
+
+    handler.requestHandler(req, res);
+
+    // Wait for response to return and then check status code
+    waitForThen(
+      function() { return res._ended; },
+      function() {
+        var messages = JSON.parse(res._data).results;
+        expect(Array.isArray(messages)).to.be.true;
+      });
+  });
+
 });
