@@ -20,7 +20,7 @@ var defaultCorsHeaders = {
 };
 
 var requestHandler = function(request, response) {
-  var results;
+  var results = [];
 
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
   var statusCode = 200;
@@ -42,30 +42,39 @@ var requestHandler = function(request, response) {
       // append object to file
       request.on('data', function(data) {
         // console.log(JSON.stringify(chunk.toString()));
-        fs.appendFile('messages.txt', JSON.stringify(data.toString()), (err) => {
-          if (err) {
-            throw err;
-          }
-          console.log('The "data to append" was appended to file!');
-        });
+        // fs.writeFile('messages.txt', JSON.stringify(data.toString()), (err) => {
+        //   if (err) {
+        //     throw err;
+        //   }
+        //   console.log('The "data to append" was appended to file!');
+        // });
+        // console.log('data: ', JSON.stringify(data));
+        fs.writeFileSync('messages.txt', data);
       });
     }
-
+    response.writeHead(statusCode, headers);
+    response.end();  
     //
   } else if (request.method === 'GET') {  // Handle GET requests
-    fs.readFile('messages.txt', (err, data) => {
-      if (err) { 
-        throw err;
-      }
-      // console.log(JSON.parse(data)); 
-      results = data; // data is a JSON object
-      console.log('Successfully read the messages file');
-      console.log('****data from messages file: ', data);
-    });
+    // fs.readFile('messages.txt', (err, data) => {
+    //   if (err) { 
+    //     throw err;
+    //   }
+    //   // console.log(JSON.parse(data)); 
+    //   results.push(JSON.stringify(data.toString())); // data is a JSON object
+    //   console.log('results: ', results);
+    //   console.log('Successfully read the messages file');
+    //   console.log('****data from messages file: ', results);
+    //   response.writeHead(statusCode, headers);
+    //   response.end(JSON.stringify({results: results}));
+    // });
+    var result = fs.readFileSync('messages.txt');
+    // console.log('result: ', typeof JSON.parse(result.toString()));
+    // console.log('result: ', JSON.parse(result.toString('utf-8')));
+    response.writeHead(statusCode, headers);
+    response.end(JSON.stringify({results: [JSON.parse(result.toString())]}));
   }
-
-  response.writeHead(statusCode, headers);
-  response.end(JSON.stringify({results: [results]}));
+  // response.end(JSON.stringify({results: results}));  
 };
 
 /*
