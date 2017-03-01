@@ -13,169 +13,96 @@ this file and include it in basic-server.js so that it actually works.
 *Hint* Check out the node module documentation at http://nodejs.org/api/modules.html.
 
 **************************************************************/
-var defaultCorsHeaders = {
+
+var messagesFile = 'messages.txt';
+
+var headers = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
   'access-control-allow-headers': 'content-type, accept',
-  'access-control-max-age': 10 // Seconds.
+  'access-control-max-age': 10, // Seconds.
+  'Content-Type': 'application/json'
 };
 
-var requestHandler = function(request, response) {
-  var results = [];
+var writeStaticFile = function(response, filePath, contentType) {
+  var fileContents = fs.readFileSync(filePath);
+  response.writeHeader(200, {'Content-Type': contentType});
+  response.end(fileContents);  
+};
 
-  console.log('Serving request type ' + request.method + ' for url ' + request.url);
-  var statusCode = 200;
-  var headers = defaultCorsHeaders;
-  headers['Content-Type'] = 'application/json';
+var serverStaticFile = {
+  '/': function(response) {
+    writeStaticFile(response, 'client/index.html', 'text/html');
+  },
+  '/styles/styles.css': function(response) {
+    writeStaticFile(response, 'client/styles/styles.css', 'text/css');
+  },
+  '/scripts/app.js': function(response) {
+    writeStaticFile(response, 'client/scripts/app.js', 'text/javascript');
+  },
+  '/bower_components/jquery/dist/jquery.js': function(response) {
+    writeStaticFile(response, 'client/bower_components/jquery/dist/jquery.js', 'text/javascript');
+  },
+  '/bower_components/underscore/underscore.js': function(response) {
+    writeStaticFile(response, 'client/bower_components/underscore/underscore.js', 'text/javascript');
+  }
+};
 
-  // Return 404 for all unhandled endpoints
-  // console.log(request.url.slice(0, 17));
+var sendResponse = function(response, statusCode, data) {
+  
+  response.writeHead(statusCode, headers);
+  response.end(data);
+};
 
-  // if nothing after port, render html
-  console.log('pathname', url.parse(request.url).pathname);
-  if (url.parse(request.url).pathname === '/') {
-    var html = fs.readFileSync('client/index.html');
-    response.writeHeader(200, {'Content-Type': 'text/html'});
-    // response.write(html,);
-    response.end(html);  
-  }
-
-  if (url.parse(request.url).pathname === '/styles/styles.css') {
-    var html = fs.readFileSync('client/styles/styles.css');
-    response.writeHeader(200, {'Content-Type': 'text/css'});
-    // response.write(html,);
-    response.end(html);  
-  }
-  if (url.parse(request.url).pathname === '/scripts/app.js') {
-    var html = fs.readFileSync('client/scripts/app.js');
-    response.writeHeader(200, {'Content-Type': 'text/javascript'});
-    // response.write(html,);
-    response.end(html);  
-  }
-  if (url.parse(request.url).pathname === '/bower_components/jquery/dist/jquery.js') {
-    var html = fs.readFileSync('client/bower_components/jquery/dist/jquery.js');
-    response.writeHeader(200, {'Content-Type': 'text/javascript'});
-    // response.write(html,);
-    response.end(html);  
-  }
-  if (url.parse(request.url).pathname === '/bower_components/underscore/underscore.js') {
-    var html = fs.readFileSync('client/bower_components/underscore/underscore.js');
-    response.writeHeader(200, {'Content-Type': 'text/javascript'});
-    // response.write(html,);
-    response.end(html);  
-  }
-
-  if (request.url.slice(0, 17) !== '/classes/messages') {
-    statusCode = 404;
-    response.writeHead(statusCode, headers);
-    response.end();
-  }
-
-  if (request.method === 'OPTIONS') {
-    // console.log('OPTIONS');
-    response.writeHead(statusCode, headers);
-    response.end(); 
-  } else if (request.method === 'POST') { // Handle POST requests
-    // Insert message into message file
+var requestActions = {
+  'OPTIONS': function(request, response) {
+    sendResponse(response, 200);
+  },
+  'POST': function(request, response) {
     if (request.url === '/classes/messages') {
-      statusCode = 201;
+      // statusCode = 201;
       // append object to file
       request.on('data', function(data) {
-
-        if (!fs.existsSync('messages.txt')) {
-
-          var obj = {results: []};
-          obj.results.unshift(JSON.parse(data.toString()));
-          fs.writeFileSync('messages.txt', JSON.stringify(obj));          
+        if (!fs.existsSync(messagesFile)) {
+          var obj = {results: []};         
         } else {
-          var obj = fs.readFileSync('messages.txt');
+          var obj = fs.readFileSync(messagesFile);
           obj = JSON.parse(obj);
-          // console.log(obj);
-          obj.results.unshift(JSON.parse(data.toString()));
-
-          fs.writeFileSync('messages.txt', JSON.stringify(obj));
         }
-
+        obj.results.unshift(JSON.parse(data.toString()));
+        fs.writeFileSync(messagesFile, JSON.stringify(obj));
       });
     }
-    response.writeHead(statusCode, headers);
-    response.end();  
-    //
-  } else if (request.method === 'GET') {  // Handle GET requests
-    // console.log('request.url: ', request.url);
+    sendResponse(response, 201);
+  },
+  'GET': function(request, response) {
     if (request.url === '/classes/messages?order=-createdAt' || request.url === '/classes/messages') {
-      if (!fs.existsSync('messages.txt')) {
-        response.writeHead(statusCode, headers);  
-        response.end(JSON.stringify({results: []}));
+      var data;
+      if (!fs.existsSync(messagesFile)) {
+        data = JSON.stringify({results: []});
       } else {
-        var obj = fs.readFileSync('messages.txt');
-        response.writeHead(statusCode, headers);
-        // response.end(JSON.stringify({results: [JSON.parse(result.toString())]})); 
-        // console.log(JSON.parse(obj.toString()));
-        obj = JSON.parse(obj.toString());
-        response.end(JSON.stringify(obj));
+        var data = fs.readFileSync(messagesFile);
+        data = JSON.stringify(JSON.parse(data.toString()));
       } 
+      sendResponse(response, 200, data);
     }
   }
 };
 
-/*
 var requestHandler = function(request, response) {
-  // Request and Response come from node's http module.
-  //
-  // They include information about both the incoming request, such as
-  // headers and URL, and about the outgoing response, such as its status
-  // and content.
-  //
-  // Documentation for both request and response can be found in the HTTP section at
-  // http://nodejs.org/documentation/api/
-
-  // Do some basic logging.
-  //
-  // Adding more logging to your server can be an easy way to get passive
-  // debugging help, but you should always be careful about leaving stray
-  // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-
-  // The outgoing status.
-  var statusCode = 200;
-  // See the note below about CORS headers.
-  var headers = defaultCorsHeaders;
-
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'application/json';
-  if (request.url !== '/classes/messages') {
-    statusCode = 404;
-    response.writeHead(statusCode, headers);
-    response.end();
+  // var statusCode = 200;
+  var serveFile = serverStaticFile[url.parse(request.url).pathname];
+  if (serveFile) {
+    serveFile(response);
   }
-
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
-
-  // Make sure to always call response.end() - Node may not send
-  // anything back to the client until you do. The string you pass to
-  // response.end() will be the body of the response - i.e. what shows
-  // up in the browser.
-  //
-  // Calling .end "flushes" the response's internal buffer, forcing
-  // node to actually send all the data over to the client.
-  response.end(JSON.stringify({results: []}));
+  if (url.parse(request.url).pathname !== '/classes/messages') {
+    sendResponse(response, 404);
+  }
+  var requestAction = requestActions[request.method];
+  if (requestAction) {
+    requestAction(request, response);
+  }
 };
-*/
-
-// These headers will allow Cross-Origin Resource Sharing (CORS).
-// This code allows this server to talk to websites that
-// are on different domains, for instance, your chat client.
-//
-// Your chat client is running from a url like file://your/chat/client/index.html,
-// which is considered a different domain.
-//
-// Another way to get around this restriction is to serve you chat
-// client from this domain by setting up static file serving.
 
 module.exports.requestHandler = requestHandler;

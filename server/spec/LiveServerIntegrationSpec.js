@@ -84,10 +84,7 @@ describe('server', function() {
       // Now if we request the log, that message we posted should be there:
       request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
         var messages = JSON.parse(body).results;
-        // console.log(messages);
         expect(Array.isArray(messages)).to.be.true;
-        // expect(messages[0].username).to.equal('Jono');
-        // expect(messages[0].text).to.equal('Do my bidding!');
         done();
       });
     });
@@ -119,17 +116,6 @@ describe('server', function() {
         done();
       });
     });
-    // request(requestParams, function(error, response, body) {
-    //   // Now if we request the log, that message we posted should be there:
-    //   request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
-    //     var messages = JSON.parse(body).results;
-    //     // console.log(messages);
-    //     expect(Array.isArray(messages)).to.be.true;
-    //     // expect(messages[0].username).to.equal('Jono');
-    //     // expect(messages[0].text).to.equal('Do my bidding!');
-    //     done();
-    //   });
-    // });
   });
 
 
@@ -142,13 +128,4 @@ describe('server', function() {
       done();
     });
   });
-
-  // it('Should return an empty array if nothing has been posted', function(done) {
-  //   request('http://127.0.0.1:3000/classes/messages', function(error, response, body) {
-  //     var messages = JSON.parse(body).results;
-  //     expect(messages.length).to.equal(0);
-  //   });
-  // });
-
-
 });
