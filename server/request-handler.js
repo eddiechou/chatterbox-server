@@ -1,4 +1,5 @@
 var fs = require('fs');
+var url = require('url');
 /*************************************************************
 
 You should implement your request handler function in this file.
@@ -29,6 +30,41 @@ var requestHandler = function(request, response) {
 
   // Return 404 for all unhandled endpoints
   // console.log(request.url.slice(0, 17));
+
+  // if nothing after port, render html
+  console.log('pathname', url.parse(request.url).pathname);
+  if (url.parse(request.url).pathname === '/') {
+    var html = fs.readFileSync('client/index.html');
+    response.writeHeader(200, {'Content-Type': 'text/html'});
+    // response.write(html,);
+    response.end(html);  
+  }
+
+  if (url.parse(request.url).pathname === '/styles/styles.css') {
+    var html = fs.readFileSync('client/styles/styles.css');
+    response.writeHeader(200, {'Content-Type': 'text/css'});
+    // response.write(html,);
+    response.end(html);  
+  }
+  if (url.parse(request.url).pathname === '/scripts/app.js') {
+    var html = fs.readFileSync('client/scripts/app.js');
+    response.writeHeader(200, {'Content-Type': 'text/javascript'});
+    // response.write(html,);
+    response.end(html);  
+  }
+  if (url.parse(request.url).pathname === '/bower_components/jquery/dist/jquery.js') {
+    var html = fs.readFileSync('client/bower_components/jquery/dist/jquery.js');
+    response.writeHeader(200, {'Content-Type': 'text/javascript'});
+    // response.write(html,);
+    response.end(html);  
+  }
+  if (url.parse(request.url).pathname === '/bower_components/underscore/underscore.js') {
+    var html = fs.readFileSync('client/bower_components/underscore/underscore.js');
+    response.writeHeader(200, {'Content-Type': 'text/javascript'});
+    // response.write(html,);
+    response.end(html);  
+  }
+
   if (request.url.slice(0, 17) !== '/classes/messages') {
     statusCode = 404;
     response.writeHead(statusCode, headers);
